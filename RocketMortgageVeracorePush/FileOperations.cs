@@ -101,7 +101,6 @@ namespace RocketMortgageVeracorePush
                 }
 
                 Console.WriteLine(o.Key);
-                Console.WriteLine(o.Value);
             }
 
             wB.Close();
@@ -109,7 +108,29 @@ namespace RocketMortgageVeracorePush
         }
 
 
+        public List<string> AllDirectories()
+        {
+            List<string> dirs = new List<string>();
+            string[] directories = Directory.GetDirectories(WorkingDirectory, "*", SearchOption.AllDirectories);
+            dirs = directories.ToList<string>();
 
+            return dirs;
+        }
+
+
+        public string GetOrderDirectory(int orderId)
+        {
+            string dir = "";
+            List<string> dirs = AllDirectories();
+            foreach(string d in dirs)
+            {
+                if (Path.GetFileName(Path.GetDirectoryName(d)) == orderId.ToString())
+                {
+                    dir = Path.GetFullPath(d);
+                }
+            }
+            return dir;
+        }
 
 
         //NOT FINISHED
@@ -122,20 +143,19 @@ namespace RocketMortgageVeracorePush
 
             for (int r = 3; r <= range.Rows.Count; r++)
             {
+                DateTime orderDate = DateTime.FromOADate(range.Cells[r, 1].Value2);
+                string getDateString = orderDate.ToString("yyyyMMdd");
                 int JobNumber = (int)range.Cells[r, 2].Value;
                 string FileURL = range.Cells[r, 5].Value2;
                 if(FileURL != null & FileURL != "")
                 {
                     using (WebClient webClient = new WebClient())
                     {
-                        webClient.DownloadFile(FileURL, WorkingDirectory + JobNumber + ".pdf");
-                        Thread.Sleep(2000);
+                        webClient.DownloadFile(FileURL, WorkingDirectory + getDateString + @"\" + JobNumber + @"\" + JobNumber+ ".pdf");
+                        Thread.Sleep(500);
                     }
                 }
             }
-
-
-
 
             wB.Close();
             xL.Quit();

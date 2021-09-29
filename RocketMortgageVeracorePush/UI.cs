@@ -17,6 +17,7 @@ namespace RocketMortgageVeracorePush
             //DISPLAY TITLE AND MENU
             h.DisplayTitle();
             h.DisplayMenu();
+            Console.WriteLine();
 
             //RUN MENU UNTIL USER EXITS
             bool exit = false;
