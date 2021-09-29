@@ -32,6 +32,15 @@ namespace RocketMortgageVeracorePush
                         Console.WriteLine("Processing orders...");
                         ProcessFiles();
                         Console.WriteLine("File processing completed.");
+                        List<Order> ords = f.Orders();
+                        foreach(Order o in ords)
+                        {
+                            f.CreateOrderSheet(o);
+                        }
+
+
+
+
                         break;
                     case '2':
                         Console.WriteLine("View order sheet...");

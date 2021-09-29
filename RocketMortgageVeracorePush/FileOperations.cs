@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Excel = Microsoft.Office.Interop.Excel;
+using Word = Microsoft.Office.Interop.Word;
+
 
 namespace RocketMortgageVeracorePush
 {
@@ -222,7 +224,91 @@ namespace RocketMortgageVeracorePush
         }
 
 
+        public void CreateOrderSheet(Order order)
+        {
+            Word.Application word = new Word.Application();
 
+            word.ShowAnimation = false;
+            word.Visible = false;
+            object missing = System.Reflection.Missing.Value;
+
+            Word.Document doc = word.Documents.Add(ref missing, ref missing, ref missing, ref missing);
+
+            var par1 = doc.Paragraphs.Add();
+
+            par1.Range.Text = "JOB " + order.JobNumber;
+
+            par1.Range.Font.Size = 24;
+            par1.Range.Paragraphs.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+
+            var par2 = doc.Paragraphs.Add();
+
+            var lastPos = par1.Range.Sentences.Last.End;
+
+            var tableRange = doc.Range(lastPos,lastPos + 1);
+
+
+            var table1 = doc.Tables.Add(tableRange, 16, 2);
+
+            table1.Cell(1, 1).Range.Text = "Job Number";
+            table1.Cell(2, 1).Range.Text = "Order Date";
+            table1.Cell(3, 1).Range.Text = "SKU";
+            table1.Cell(4, 1).Range.Text = "File Name";
+            table1.Cell(5, 1).Range.Text = "File URL";
+            table1.Cell(6, 1).Range.Text = "Quantity";
+            table1.Cell(7, 1).Range.Text = "Order Ship Quantity";
+            table1.Cell(8, 1).Range.Text = "First Name";
+            table1.Cell(9, 1).Range.Text = "Last Name";
+            table1.Cell(10, 1).Range.Text = "Address";
+            table1.Cell(11, 1).Range.Text = "Address Line 2";
+            table1.Cell(12, 1).Range.Text = "City";
+            table1.Cell(13, 1).Range.Text = "State";
+            table1.Cell(14, 1).Range.Text = "Zip";
+            table1.Cell(15, 1).Range.Text = "Email";
+            table1.Cell(16, 1).Range.Text = "Phone";
+
+            for(int i = 1; i < 17; i++)
+            {
+                table1.Cell(i, 1).Range.Paragraphs.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
+            }
+
+            
+            table1.Cell(1, 2).Range.Text = order.JobNumber.ToString();
+            table1.Cell(2, 2).Range.Text = order.OrderDate.ToString();
+            table1.Cell(3, 2).Range.Text = order.SKU.ToString();
+            if (order.FileName != null & order.FileName != "") table1.Cell(4, 2).Range.Text = order.FileName.ToString();
+            if (order.FileURL != null & order.FileURL != "") table1.Cell(5, 2).Range.Text = order.FileURL.ToString();
+            table1.Cell(6, 2).Range.Text = order.Quantity.ToString();
+            table1.Cell(7, 2).Range.Text = order.OrderShipQuantity.ToString();
+            table1.Cell(8, 2).Range.Text = order.FirstName.ToString();
+            table1.Cell(9, 2).Range.Text = order.LastName.ToString();
+            table1.Cell(10, 2).Range.Text = order.Address.ToString();
+            
+            if(order.Address2 != null & order.Address2 != "") table1.Cell(11, 2).Range.Text = order.Address2.ToString();
+            
+            table1.Cell(12, 2).Range.Text = order.City.ToString();
+            table1.Cell(13, 2).Range.Text = order.State.ToString();
+            table1.Cell(14, 2).Range.Text = order.Zip.ToString();
+            table1.Cell(15, 2).Range.Text = order.Email.ToString();
+            table1.Cell(16, 2).Range.Text = order.Phone.ToString();
+
+
+            table1.Cell(1, 1).Range.Font.Size = 24;
+            table1.Cell(1, 2).Range.Font.Size = 24;
+
+            table1.AllowAutoFit = true;
+            Word.Column col1 = table1.Columns[1];
+            col1.AutoFit();
+
+
+            doc.SaveAs(WorkingDirectory + order.JobNumber + ".doc");
+            word.Quit();
+
+
+
+
+
+        }
 
 
 
