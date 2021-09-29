@@ -8,16 +8,18 @@ namespace RocketMortgageVeracorePush
 {
     public class UI
     {
+            //INSTANTIATE NEEDED CLASSES
+            FileOperations f = new FileOperations();
+            Helpers h = new Helpers();        
+        
         public void RunUI()
         {
-            Helpers h = new Helpers();
-            FileOperations f = new FileOperations();
-
+            //DISPLAY TITLE AND MENU
             h.DisplayTitle();
             h.DisplayMenu();
 
+            //RUN MENU UNTIL USER EXITS
             bool exit = false;
-
             while (exit == false)
             {
                 Console.WriteLine("Please make a selection from the menu:");
@@ -26,18 +28,12 @@ namespace RocketMortgageVeracorePush
                 switch (selection)
                 {
                     case '1':
-                        f.CreateDateFolders();
-                        f.DownloadArt();
-                        //GETS THE ORDERS FROM THE EXCEL FILE
-                        List<Order> ords = f.Orders();
-                        //CREATES A JSON FILE FROM THE ORDERS
-                        f.CreateJSONOrders(ords);
-                        //CREATES A TAB DELIMITED TEXT FILE FROM THE ORDERS
-                        f.CreateTabDelimitedOrderFile(ords);
-                        //CREATES AN XML FILE FROM THE ORDERS
-                        f.CreateXML(ords);
+                        Console.WriteLine("Processing orders...");
+                        ProcessFiles();
+                        Console.WriteLine("File processing completed.");
                         break;
                     case '2':
+                        Console.WriteLine("View order sheet...");
                         f.OpenExcelOrder();
                         break;
                     case '3':
@@ -49,5 +45,19 @@ namespace RocketMortgageVeracorePush
                 }
             }
         }
+
+
+        public void ProcessFiles()
+        {
+            f.CreateDateFolders();
+            f.DownloadArt();
+            List<Order> ords = f.Orders();  //GETS THE ORDERS FROM THE EXCEL FILE
+            f.CreateJSONOrders(ords);  //CREATES A JSON FILE FROM THE ORDERS
+            f.CreateTabDelimitedOrderFile(ords);  //CREATES A TAB DELIMITED TEXT FILE FROM THE ORDERS
+            f.CreateXML(ords);  //CREATES AN XML FILE FROM THE ORDERS
+        }
+
+
+
     }
 }

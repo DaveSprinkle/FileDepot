@@ -69,26 +69,39 @@ namespace RocketMortgageVeracorePush
             Excel.Worksheet wS = wB.Sheets[1];
             Excel.Range range = wS.UsedRange;
 
-            HashSet<string> folders = new HashSet<string>();
-            HashSet<string> orders = new HashSet<string>();
+            Dictionary<int, string> orderNumDate = new Dictionary<int, string>();
 
             for (int r = 3; r <= range.Rows.Count; r++)
             {
                 DateTime orderDate = DateTime.FromOADate(range.Cells[r, 1].Value2);
-                string orderNum = range.Cells[r, 1].Value2.ToString();
-
+                int orderNum = (int)range.Cells[r, 2].Value;
                 string getDateString = orderDate.ToString("yyyyMMdd");
 
-                folders.Add(getDateString);
-                
+                orderNumDate.Add(orderNum, getDateString);
             }
 
-            foreach (string f in folders)
+            foreach(KeyValuePair<int, string> o in orderNumDate)
             {
-                if(!Directory.Exists(WorkingDirectory + f))
+                if(!Directory.Exists(WorkingDirectory + o.Value))
                 {
-                    Directory.CreateDirectory(WorkingDirectory + f);
+                    Directory.CreateDirectory(WorkingDirectory + o.Value);
+                    string dateDir = WorkingDirectory + o.Value + @"\";
+                    if (!Directory.Exists(dateDir + o.Key))
+                    {
+                        Directory.CreateDirectory(dateDir + o.Key);
+                    }
                 }
+                else
+                {
+                    string dateDir = WorkingDirectory + o.Value + @"\";
+                    if (!Directory.Exists(dateDir + o.Key))
+                    {
+                        Directory.CreateDirectory(dateDir + o.Key);
+                    }
+                }
+
+                Console.WriteLine(o.Key);
+                Console.WriteLine(o.Value);
             }
 
             wB.Close();
@@ -116,7 +129,7 @@ namespace RocketMortgageVeracorePush
                     using (WebClient webClient = new WebClient())
                     {
                         webClient.DownloadFile(FileURL, WorkingDirectory + JobNumber + ".pdf");
-                        Thread.Sleep(1000);
+                        Thread.Sleep(2000);
                     }
                 }
             }
