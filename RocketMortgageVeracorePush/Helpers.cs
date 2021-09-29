@@ -10,7 +10,7 @@ namespace RocketMortgageVeracorePush
     {
         static string[] Title = {"ROCKET MORTGAGE ORDER PROCESSING", "v 1.0" };
         
-        static string WorkingDirectory = @"\\hw30106-01\HP_Serv02_Y\RocketMortgage";
+        static string WorkingDirectory = @"\\hw30106-01\HP_Serv02_Y\RocketMortgage\";
 
         static string[] MenuItems = { "Process Today's Orders", "View Today's Orders", "Exit" };
 

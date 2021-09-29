@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -29,7 +32,7 @@ namespace RocketMortgageVeracorePush
             Excel.Worksheet wS = wB.Sheets[1];
             Excel.Range range = wS.UsedRange;
 
-            for (int r = 3; r < range.Rows.Count; r++)
+            for (int r = 3; r <= range.Rows.Count; r++)
             {
                 Order newOrder = new Order();
                 newOrder.OrderDate = DateTime.FromOADate(range.Cells[r, 1].Value2);
@@ -52,8 +55,79 @@ namespace RocketMortgageVeracorePush
                 orders.Add(newOrder);
             }
 
+            wB.Close();
+            xL.Quit();
+
             return orders;
         }
+
+
+        public void CreateDateFolders()
+        {
+            Excel.Application xL = new Excel.Application();
+            Excel.Workbook wB = xL.Workbooks.Open(WorkingDirectory + fakeExcelName);
+            Excel.Worksheet wS = wB.Sheets[1];
+            Excel.Range range = wS.UsedRange;
+
+            HashSet<string> folders = new HashSet<string>();
+            HashSet<string> orders = new HashSet<string>();
+
+            for (int r = 3; r <= range.Rows.Count; r++)
+            {
+                DateTime orderDate = DateTime.FromOADate(range.Cells[r, 1].Value2);
+                string orderNum = range.Cells[r, 1].Value2.ToString();
+
+                string getDateString = orderDate.ToString("yyyyMMdd");
+
+                folders.Add(getDateString);
+                
+            }
+
+            foreach (string f in folders)
+            {
+                if(!Directory.Exists(WorkingDirectory + f))
+                {
+                    Directory.CreateDirectory(WorkingDirectory + f);
+                }
+            }
+
+            wB.Close();
+            xL.Quit();
+        }
+
+
+
+
+
+        //NOT FINISHED
+        public void DownloadArt()
+        {
+            Excel.Application xL = new Excel.Application();
+            Excel.Workbook wB = xL.Workbooks.Open(WorkingDirectory + fakeExcelName);
+            Excel.Worksheet wS = wB.Sheets[1];
+            Excel.Range range = wS.UsedRange;
+
+            for (int r = 3; r <= range.Rows.Count; r++)
+            {
+                int JobNumber = (int)range.Cells[r, 2].Value;
+                string FileURL = range.Cells[r, 5].Value2;
+                if(FileURL != null & FileURL != "")
+                {
+                    using (WebClient webClient = new WebClient())
+                    {
+                        webClient.DownloadFile(FileURL, WorkingDirectory + JobNumber + ".pdf");
+                        Thread.Sleep(1000);
+                    }
+                }
+            }
+
+
+
+
+            wB.Close();
+            xL.Quit();
+        }
+
 
 
         public void CreateTabDelimitedOrderFile(List<Order> orders)
@@ -83,6 +157,38 @@ namespace RocketMortgageVeracorePush
                 serializer.Serialize(writer, orders);
             }
         }
+
+
+        public void CreateJSONOrder(Order order, int marker)
+        {
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+
+            using (StreamWriter sw = new StreamWriter(WorkingDirectory + marker.ToString() + "json.txt"))
+
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, order);
+            }
+        }
+
+
+        public void CreateJSONOrders(List<Order> orders)
+        {
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+
+            StreamWriter sw = new StreamWriter(WorkingDirectory + "json.txt");
+            JsonWriter writer = new JsonTextWriter(sw);
+
+            foreach (Order o in orders)
+            {
+                serializer.Serialize(writer, o);
+            }
+            sw.Close();
+        }
+
+
 
 
 

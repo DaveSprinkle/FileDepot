@@ -98,12 +98,5 @@ namespace RocketMortgageVeracorePush
             Console.WriteLine("\t" + this.Email);
             Console.WriteLine("\t" + this.Phone);
         }
-        
-
-
-
-
-
-
     }
 }
