@@ -18,12 +18,44 @@ namespace RocketMortgageVeracorePush
     public class FileOperations
     {
         static string WorkingDirectory = @"\\hw30106-01\HP_Serv02_Y\RocketMortgage\";
+        static string DownloadDirectory = @"\\hw30106-01\HP_Serv02_Y\RocketMortgage\Download";
+        static string LoggingDirectory = @"\\hw30106-01\HP_Serv02_Y\RocketMortgage\";
+
         static string fakeExcelName = "Quicken_ProdOrderFile_2021-09-15.xlsx";
+
+
+        public string GetYesterFileName()
+        {
+            DateTime yesterday = DateTime.Now.AddDays(-1);
+            string yesterString = yesterday.ToString("yyyy-MM-dd");
+            return "Quicken_ProdOrderFile_" + yesterString + ".xlsx";
+        }
+
+
+        public string[] GetNewFile()
+        {
+            string[] files = Directory.GetFiles(WorkingDirectory, "*.xlsx");
+
+            return files;
+        }
+
+        
+        public List<string> GetFiles()
+        {
+            List<string> files = new List<string>();
+            string[] fileNames = Directory.GetFiles(WorkingDirectory, "*.xlsx");
+
+            files = fileNames.ToList();
+
+            return files;
+        }
+      
 
         public void OpenExcelOrder()
         {
             Process.Start(WorkingDirectory + fakeExcelName);
         }
+
 
         public List<Order> Orders()
         {
@@ -226,30 +258,21 @@ namespace RocketMortgageVeracorePush
 
         public void CreateOrderSheet(Order order)
         {
+            //USE THE WORD APPLICATION 
             Word.Application word = new Word.Application();
-
             word.ShowAnimation = false;
             word.Visible = false;
-            object missing = System.Reflection.Missing.Value;
 
+            //START A NEW DOCUMENT
+            object missing = System.Reflection.Missing.Value;
             Word.Document doc = word.Documents.Add(ref missing, ref missing, ref missing, ref missing);
 
+            //ADD A PARAGRAPH AND A TABLE
             var par1 = doc.Paragraphs.Add();
-
-            par1.Range.Text = "JOB " + order.JobNumber;
-
-            par1.Range.Font.Size = 24;
-            par1.Range.Paragraphs.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
-
-            var par2 = doc.Paragraphs.Add();
-
-            var lastPos = par1.Range.Sentences.Last.End;
-
-            var tableRange = doc.Range(lastPos,lastPos + 1);
-
-
+            var tableRange = doc.Range(1, 2);
             var table1 = doc.Tables.Add(tableRange, 16, 2);
 
+            //PUT PROPERTY NAMES DOWN THE FIRST COLUMN
             table1.Cell(1, 1).Range.Text = "Job Number";
             table1.Cell(2, 1).Range.Text = "Order Date";
             table1.Cell(3, 1).Range.Text = "SKU";
@@ -267,12 +290,13 @@ namespace RocketMortgageVeracorePush
             table1.Cell(15, 1).Range.Text = "Email";
             table1.Cell(16, 1).Range.Text = "Phone";
 
+            //ALIGN THE FIRST COLUMN TO THE RIGHT
             for(int i = 1; i < 17; i++)
             {
                 table1.Cell(i, 1).Range.Paragraphs.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
             }
 
-            
+            //PUT THE PROPERTY VALUES DOWN THE SECOND COLUMN 
             table1.Cell(1, 2).Range.Text = order.JobNumber.ToString();
             table1.Cell(2, 2).Range.Text = order.OrderDate.ToString();
             table1.Cell(3, 2).Range.Text = order.SKU.ToString();
@@ -283,35 +307,36 @@ namespace RocketMortgageVeracorePush
             table1.Cell(8, 2).Range.Text = order.FirstName.ToString();
             table1.Cell(9, 2).Range.Text = order.LastName.ToString();
             table1.Cell(10, 2).Range.Text = order.Address.ToString();
-            
             if(order.Address2 != null & order.Address2 != "") table1.Cell(11, 2).Range.Text = order.Address2.ToString();
-            
             table1.Cell(12, 2).Range.Text = order.City.ToString();
             table1.Cell(13, 2).Range.Text = order.State.ToString();
             table1.Cell(14, 2).Range.Text = order.Zip.ToString();
             table1.Cell(15, 2).Range.Text = order.Email.ToString();
             table1.Cell(16, 2).Range.Text = order.Phone.ToString();
 
-
+            //CHANGE THE JOB NUMBER ROW TO LARGE FONT
             table1.Cell(1, 1).Range.Font.Size = 24;
             table1.Cell(1, 2).Range.Font.Size = 24;
 
+            //SHRINK THE FIRST COLUMN TO MINIMAL SIZE
             table1.AllowAutoFit = true;
             Word.Column col1 = table1.Columns[1];
             col1.AutoFit();
 
-
-            doc.SaveAs(WorkingDirectory + order.JobNumber + ".doc");
+            //SAVE THE DOCUMENT TO THE PROPER FOLDER AND QUIT WORD
+            doc.SaveAs(WorkingDirectory + order.OrderDate + @"\" + order.JobNumber + @"\" + order.JobNumber + ".doc");
             word.Quit();
-
-
-
-
-
         }
 
 
-
+        public string WriteData(string input)
+        {
+            if(input != null & input != "")
+            {
+                return input;
+            }
+            return "";
+        }
 
 
 
